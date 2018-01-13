@@ -17,9 +17,9 @@ test_that("get_params return params equal to POST or GET", {
 
 })
 
-test_that("get_fun returns first relative endpoint", {
+test_that("get_fun returns second relative endpoint", {
 
-  SERVER$path_info <- '/endpoint/A/B/Z/234234?a=1&b=2'
+  SERVER$path_info <- '/handlr/function/B/Z/234234?a=1&b=2'
   fun <- handlr:::get_fun(SERVER)
-  expect_equal(fun, 'endpoint')
+  expect_equal(fun, 'function')
 })

@@ -67,7 +67,7 @@ get_params <- function(GET, POST, SERVER) {
 #' @examples
 get_fun <- function(SERVER) {
 
-  fun <- strsplit(SERVER$path_info, '/')[[1]][2]
+  fun <- strsplit(SERVER$path_info, '/')[[1]][3]
   return(fun)
 }
 
