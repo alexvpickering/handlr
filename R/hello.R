@@ -1,6 +1,6 @@
 # Hello, world!
 #
-# This is an example function named 'hello' 
+# This is an example function named 'hello'
 # which prints 'Hello, world!'.
 #
 # You can learn more about package authoring with RStudio at:
@@ -13,6 +13,15 @@
 #   Check Package:             'Ctrl + Shift + E'
 #   Test Package:              'Ctrl + Shift + T'
 
-hello <- function() {
-  print("Hello, world!")
+#' Handler function for incomming HTTP requests
+#'
+#' @return
+#' @export
+#'
+#' @examples
+handle <- function() {
+  saveRDS(1:5, 'blah.rds')
+  cat(getwd())
+
+  return(DONE)
 }
