@@ -50,7 +50,7 @@ handle <- function(GET, POST, COOKIES, FILES, SERVER,
 #' @return
 #'
 #' @examples
-set_status <- function(status, message) {
+set_status <- function(status, message=NULL) {
   if (is_rapache()) {
     setStatus(status=status)
     cat(message)
