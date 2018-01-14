@@ -33,7 +33,7 @@ handle <- function(GET, POST, COOKIES, FILES, SERVER,
   )
 
   # return JSON object
-  set_status(200L, message)
+  set_status(200L)
   as.vector(jsonlite::toJSON(result))
 
 }
