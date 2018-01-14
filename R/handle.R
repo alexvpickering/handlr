@@ -18,7 +18,7 @@ handle <- function(GET, POST, COOKIES, FILES, SERVER, packages) {
   params <- get_params(GET, POST, SERVER)
   fun <- get_fun(SERVER)
 
-  check_package(fun[1], packages)
+  test_package(fun[1], packages)
 
 
   setStatus(status=200L)
