@@ -7,23 +7,37 @@
 #' @param FILES rApache variable:
 #' @param SERVER rApache variable: list
 #' @param allowed_packages character vector of allowed packages
+#' @param timeout maximum time in seconds to allow for call to return
+#' @param rlimits named vector/list with RLIMIT values, for example: c(cpu = 60, fsize = 1e6)
 #'
 #' @return
 #' @export
 #'
 #' @examples
-handle <- function(GET, POST, COOKIES, FILES, SERVER, allowed_packages) {
+handle <- function(GET, POST, COOKIES, FILES, SERVER,
+                   allowed_packages, timeout = 0, rlimits = NULL) {
 
   params   <- get_params(GET, POST, SERVER)
   endpoint <- get_endpoint(SERVER)
 
   if (!valid_endpoint(endpoint, allowed_packages)) return()
 
+  # get function to call (same as pkg::name)
+  what <- getExportedValue(endpoint[1], endpoint[2])
 
-  message <- paste('Package', endpoint[1], 'exports', endpoint[2], '. Yay!\n')
+  # call function in forked process with specified limits
+  result <- sys::eval_safe(
+    do.call(what, params),
+    timeout = timeout,
+    rlimits = rlimits
+  )
+
+  # return JSON object
   set_status(200L, message)
+  as.vector(jsonlite::toJSON(result))
 
 }
+
 
 #'
 #'
@@ -57,7 +71,7 @@ valid_endpoint <- function(endpoint, allowed_packages) {
   if (!endpoint[1] %in% allowed_packages) {
 
     message <- paste('Package', endpoint[1], 'is not an allowed package.\n')
-    set_status(404L, message)
+    set_status(403L, message)
     return(FALSE)
   }
 
@@ -66,7 +80,7 @@ valid_endpoint <- function(endpoint, allowed_packages) {
   if (!endpoint[2] %in% package_functions) {
 
     message <- paste0('Function ', endpoint[2], ' is not exported by package ', endpoint[1], '.\n')
-    set_status(500L, message)
+    set_status(404L, message)
     return(FALSE)
   }
 
