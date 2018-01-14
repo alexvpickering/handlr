@@ -76,7 +76,7 @@ valid_endpoint <- function(endpoint, allowed_packages) {
   }
 
   # check if package exports function
-  package_functions <- get_exports(endpoint[1])
+  package_functions <- getNamespaceExports(endpoint[1])
   if (!endpoint[2] %in% package_functions) {
 
     message <- paste0('Function ', endpoint[2], ' is not exported by package ', endpoint[1], '.\n')
@@ -85,21 +85,6 @@ valid_endpoint <- function(endpoint, allowed_packages) {
   }
 
   return(TRUE)
-}
-
-#' Reads the NAMESPACE file for installed package
-#'
-#' @param package Package name to read NAMESPACE from
-#'
-#' @return character vector of exports from package
-#'
-#' @examples
-get_exports <- function(package) {
-
-  f <- base::system.file("NAMESPACE", package=package)
-  objs <- readLines(f)
-  exps <- objs[grepl("export", objs)]
-  sub("^export[^\\(]*\\(([^\\)]+)\\)", "\\1", exps)
 }
 
 

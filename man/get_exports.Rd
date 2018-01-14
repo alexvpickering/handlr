@@ -7,10 +7,10 @@
 get_exports(package)
 }
 \arguments{
-\item{package}{}
+\item{package}{Package name to read NAMESPACE from}
 }
 \value{
-
+character vector of exports from package
 }
 \description{
 Reads the NAMESPACE file for installed package

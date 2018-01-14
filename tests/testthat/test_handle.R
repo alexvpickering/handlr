@@ -33,15 +33,20 @@ test_that("get_endpoint returns vector of package name and function", {
 
 test_that("valid_endpoint allows exported functions in specified packages", {
 
-    packages <- 'handlr'
-
-    result <- handlr:::valid_endpoint(c('handlr', 'handle'), packages)
+    result <- handlr:::valid_endpoint(c('ggplot2', 'ggplot'), 'ggplot2')
     expect_true(result)
 
-    result <- handlr:::valid_endpoint(c('handlr', 'set_status'), packages)
+    result <- handlr:::valid_endpoint(c('ggplot2', 'matrix'), 'ggplot2')
     expect_false(result)
 
-    result <- handlr:::valid_endpoint(c('handlr', 'ggplot'), packages)
+    result <- handlr:::valid_endpoint(c('base', 'matrix'), 'base')
+    expect_true(result)
+
+    result <- handlr:::valid_endpoint(c('gobledigook', 'matrix'), 'base')
     expect_false(result)
 
+})
+
+test_that("set_status returns NULL outside of rApache", {
+  expect_null(handlr:::set_status(404L, 'Error!'))
 })
