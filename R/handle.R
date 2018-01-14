@@ -13,7 +13,6 @@
 #'
 #' @examples
 handle <- function(GET, POST, COOKIES, FILES, SERVER, allowed_packages) {
-  check_rapache()
 
   params   <- get_params(GET, POST, SERVER)
   endpoint <- get_endpoint(SERVER)
