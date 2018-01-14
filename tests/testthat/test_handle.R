@@ -17,9 +17,15 @@ test_that("get_params return params equal to POST or GET", {
 
 })
 
-test_that("get_fun returns second relative endpoint", {
+test_that("get_fun returns vector of package name and function", {
 
-  SERVER$path_info <- '/handlr/function/B/Z/234234?a=1&b=2'
+  SERVER$path_info <- '/package_name/function/'
   fun <- handlr:::get_fun(SERVER)
-  expect_equal(fun, 'function')
+  expect_equal(fun[1], 'package_name')
+  expect_equal(fun[2], 'function')
+
+  SERVER$path_info <- '/package_name/function/IGNORE_THIS?a=1&b=2'
+  fun <- handlr:::get_fun(SERVER)
+  expect_equal(fun[1], 'package_name')
+  expect_equal(fun[2], 'function')
 })

@@ -10,7 +10,7 @@ get_fun(SERVER)
 \item{SERVER}{rApache variable: list}
 }
 \value{
-endoint character
+character vector of length 2 with first being the package and second the function
 }
 \description{
 Gets the first relative endpoint (function name) from a path

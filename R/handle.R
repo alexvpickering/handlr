@@ -6,27 +6,35 @@
 #' @param COOKIES rApache variable: list of cookies
 #' @param FILES rApache variable:
 #' @param SERVER rApache variable: list
+#' @param packages character vector of allowed packages
 #'
 #' @return
 #' @export
 #'
 #' @examples
-handle <- function(GET, POST, COOKIES, FILES, SERVER) {
+handle <- function(GET, POST, COOKIES, FILES, SERVER, packages) {
   check_rapache()
 
   params <- get_params(GET, POST, SERVER)
   fun <- get_fun(SERVER)
 
-  if (!is.function(fun)) {
-    setStatus(status=404L)
-    cat(paste('Function', fun, 'was not found.'))
-    return()
-  }
+  check_package(fun[1], packages)
+
 
   setStatus(status=200L)
   cat(paste('Function', fun, 'was found. Yay!'))
 
 }
+
+test_package <- function(package, packages) {
+  if (!package %in% packages) {
+    setStatus(status=404L)
+    cat(paste('Package', package, 'is not an allowed package.'))
+    stop()
+  }
+}
+
+
 
 #' Throws error if rApache not being used
 #'
@@ -61,13 +69,15 @@ get_params <- function(GET, POST, SERVER) {
 #'
 #' @param SERVER rApache variable: list
 #'
-#' @return endoint character
+#' @return character vector of length 2 with first being the package and second the function
 #' @keywords internal
 #'
 #' @examples
 get_fun <- function(SERVER) {
 
-  fun <- strsplit(SERVER$path_info, '/')[[1]][3]
+  fun <- strsplit(SERVER$path_info, '/')[[1]][2:3]
+
+
   return(fun)
 }
 
