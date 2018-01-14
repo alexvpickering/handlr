@@ -45,6 +45,10 @@ test_that("valid_endpoint allows exported functions in specified packages", {
     result <- handlr:::valid_endpoint(c('gobledigook', 'matrix'), 'base')
     expect_false(result)
 
+    # example test that should fail but doesn't
+    # not critical as handlr functions will not be endpoints
+    result <- handlr:::valid_endpoint(c('handlr', 'valid_endpoint'), 'handlr')
+    expect_failure(expect_false(result))
 })
 
 test_that("set_status returns NULL outside of rApache", {
