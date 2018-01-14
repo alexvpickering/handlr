@@ -6,44 +6,100 @@
 #' @param COOKIES rApache variable: list of cookies
 #' @param FILES rApache variable:
 #' @param SERVER rApache variable: list
-#' @param packages character vector of allowed packages
+#' @param allowed_packages character vector of allowed packages
 #'
 #' @return
 #' @export
 #'
 #' @examples
-handle <- function(GET, POST, COOKIES, FILES, SERVER, packages) {
+handle <- function(GET, POST, COOKIES, FILES, SERVER, allowed_packages) {
   check_rapache()
 
-  params <- get_params(GET, POST, SERVER)
-  fun <- get_fun(SERVER)
+  params   <- get_params(GET, POST, SERVER)
+  endpoint <- get_endpoint(SERVER)
 
-  test_package(fun[1], packages)
+  if (!valid_endpoint(endpoint, allowed_packages)) return()
 
 
-  setStatus(status=200L)
-  cat(paste('Function', fun, 'was found. Yay!'))
+  message <- paste('Package', endpoint[1], 'exports', endpoint[2], '. Yay!\n')
+  set_status(200L, message)
 
 }
 
-test_package <- function(package, packages) {
-  if (!package %in% packages) {
-    setStatus(status=404L)
-    cat(paste('Package', package, 'is not an allowed package.'))
-    stop()
+#'
+#'
+#' Helper function to permit testing. Instead of setting status directly,
+#' checks if environment is rApache and only calls setStatus if so.
+#'
+#' @param status
+#' @param message
+#'
+#' @return
+#'
+#' @examples
+set_status <- function(status, message) {
+  if (is_rapache()) {
+    setStatus(status=status)
+    cat(message)
   }
 }
 
+#' Check if endpoint is allowed/exists
+#'
+#' @param endpoint Character vector length two: package and function name
+#' @param allowed_packages Character vector of allowed package endpoints
+#'
+#' @return
+#'
+#' @examples
+valid_endpoint <- function(endpoint, allowed_packages) {
+
+  # check if package is allowed
+  if (!endpoint[1] %in% allowed_packages) {
+
+    message <- paste('Package', endpoint[1], 'is not an allowed package.\n')
+    set_status(404L, message)
+    return(FALSE)
+  }
+
+  # check if package exports function
+  package_functions <- get_exports(endpoint[1])
+  if (!endpoint[2] %in% package_functions) {
+
+    message <- paste0('Function ', endpoint[2], ' is not exported by package ', endpoint[1], '.\n')
+    set_status(500L, message)
+    return(FALSE)
+  }
+
+  return(TRUE)
+}
+
+#' Reads the NAMESPACE file for installed package
+#'
+#' @param package Package name to read NAMESPACE from
+#'
+#' @return character vector of exports from package
+#'
+#' @examples
+get_exports <- function(package) {
+
+  f <- base::system.file("NAMESPACE", package=package)
+  objs <- readLines(f)
+  exps <- objs[grepl("export", objs)]
+  sub("^export[^\\(]*\\(([^\\)]+)\\)", "\\1", exps)
+}
 
 
-#' Throws error if rApache not being used
+
+#' Checks if rApache is being used
 #'
 #' @return
 #' @keywords internal
 #'
 #' @examples
-check_rapache <- function() {
-  stopifnot(is.function(setStatus))
+is_rapache <- function() {
+  if (exists('setStatus')) return(TRUE)
+  return(FALSE)
 }
 
 
@@ -65,20 +121,18 @@ get_params <- function(GET, POST, SERVER) {
   return(params)
 }
 
-#' Gets the first relative endpoint (function name) from a path
+#' Gets the package and function names from a path
 #'
 #' @param SERVER rApache variable: list
 #'
-#' @return character vector of length 2 with first being the package and second the function
+#' @return character vector of length 2 with first string being the package name and the second the function name
 #' @keywords internal
 #'
 #' @examples
-get_fun <- function(SERVER) {
+get_endpoint <- function(SERVER) {
 
-  fun <- strsplit(SERVER$path_info, '/')[[1]][2:3]
-
-
-  return(fun)
+  endpoint <- strsplit(SERVER$path_info, '/')[[1]][2:3]
+  return(endpoint)
 }
 
 

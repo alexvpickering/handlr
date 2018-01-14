@@ -17,15 +17,31 @@ test_that("get_params return params equal to POST or GET", {
 
 })
 
-test_that("get_fun returns vector of package name and function", {
+test_that("get_endpoint returns vector of package name and function", {
 
   SERVER$path_info <- '/package_name/function/'
-  fun <- handlr:::get_fun(SERVER)
-  expect_equal(fun[1], 'package_name')
-  expect_equal(fun[2], 'function')
+  endpoint <- handlr:::get_endpoint(SERVER)
+  expect_equal(endpoint[1], 'package_name')
+  expect_equal(endpoint[2], 'function')
 
   SERVER$path_info <- '/package_name/function/IGNORE_THIS?a=1&b=2'
-  fun <- handlr:::get_fun(SERVER)
-  expect_equal(fun[1], 'package_name')
-  expect_equal(fun[2], 'function')
+  endpoint <- handlr:::get_endpoint(SERVER)
+  expect_equal(endpoint[1], 'package_name')
+  expect_equal(endpoint[2], 'function')
+
+})
+
+test_that("valid_endpoint allows exported functions in specified packages", {
+
+    packages <- 'handlr'
+
+    result <- handlr:::valid_endpoint(c('handlr', 'handle'), packages)
+    expect_true(result)
+
+    result <- handlr:::valid_endpoint(c('handlr', 'set_status'), packages)
+    expect_false(result)
+
+    result <- handlr:::valid_endpoint(c('handlr', 'ggplot'), packages)
+    expect_false(result)
+
 })

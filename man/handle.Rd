@@ -4,7 +4,7 @@
 \alias{handle}
 \title{Handles incomming rApache requests}
 \usage{
-handle(GET, POST, COOKIES, FILES, SERVER, packages)
+handle(GET, POST, COOKIES, FILES, SERVER, allowed_packages)
 }
 \arguments{
 \item{GET}{rApache variable: list of parameters}
@@ -17,7 +17,7 @@ handle(GET, POST, COOKIES, FILES, SERVER, packages)
 
 \item{SERVER}{rApache variable: list}
 
-\item{packages}{character vector of allowed packages}
+\item{allowed_packages}{character vector of allowed packages}
 }
 \description{
 Handles incomming rApache requests
