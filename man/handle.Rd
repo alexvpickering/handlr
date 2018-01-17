@@ -4,25 +4,24 @@
 \alias{handle}
 \title{Handles incomming rApache requests}
 \usage{
-handle(GET, POST, COOKIES, FILES, SERVER, allowed_packages, timeout = 0,
+handle(SERVER, packages, open = "all", secret = NULL, timeout = 0,
   rlimits = NULL)
 }
 \arguments{
-\item{GET}{rApache variable: list of parameters}
+\item{SERVER}{rApache variable.}
 
-\item{POST}{rApache variable: list of parameters}
+\item{packages}{Vector of packages that api allows.}
 
-\item{COOKIES}{rApache variable: list of cookies}
+\item{open}{Endpoints that are open to non-authenticated users.
+Specify as list of length 2 character vectors
+for example: list(c('package_name', 'package_function'))}
 
-\item{FILES}{rApache variable:}
+\item{timeout}{Time limit in seconds for function to execute.}
 
-\item{SERVER}{rApache variable: list}
+\item{rlimits}{named vector/list with rlimit values,
+for example: c(cpu = 60, fsize = 1e6).}
 
-\item{allowed_packages}{character vector of allowed packages}
-
-\item{timeout}{maximum time in seconds to allow for call to return}
-
-\item{rlimits}{named vector/list with RLIMIT values, for example: c(cpu = 60, fsize = 1e6)}
+\item{key}{string or raw vector needed to decode JSON web token.}
 }
 \description{
 Handles incomming rApache requests
