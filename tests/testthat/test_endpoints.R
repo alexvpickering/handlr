@@ -1,5 +1,6 @@
 # setup
 library(handlr)
+context("Endpoint functions")
 
 SERVER <- list(method='GET')
 
