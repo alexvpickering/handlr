@@ -1,4 +1,3 @@
-
 #' Handles incomming rApache requests
 #'
 #' @param SERVER rApache variable.
@@ -7,7 +6,8 @@
 #' @param open Endpoints that are open to non-authenticated users.
 #'    Specify as named list of vectors.
 #'    for example: list(package_name = 'package_function')
-#' @param key string or raw vector needed to decode JSON web token.
+#' @param secret string or raw vector needed to encode/decode JSON web token.
+#'    Gets passed along to endpoints with argument 'secret'.
 #' @param timeout Time limit in seconds for function to execute.
 #' @param rlimits named vector/list with rlimit values,
 #'    for example: c(cpu = 60, fsize = 1e6).
@@ -34,8 +34,6 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
   # parse request
   req_data <- parse_req(SERVER, GET)
   rapache('setHeader', header = "X-Powered-By" ,value = "rApache")
-
-  print(req_data)
 
   # get function to call (same as pkg::name)
   what <- getExportedValue(endpoint$pkg, endpoint$fun)
@@ -87,8 +85,8 @@ endpoint_open <- function(endpoint, open='all') {
 #'
 #' Calls rApache function if it can
 #'
-#' @param rapache_function
-#' @param arguments
+#' @param rapache_function Name of rApache function to evaluate.
+#' @param ... Additional arguments to rApache function.
 #'
 #' @return
 #' @export

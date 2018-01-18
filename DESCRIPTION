@@ -8,7 +8,9 @@ Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 Imports:
   sys,
-  jose
+  jose,
+  webutils,
+  curl
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
