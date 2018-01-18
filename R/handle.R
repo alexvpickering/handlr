@@ -21,7 +21,6 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
 
   names(SERVER$headers_in) <- tolower(names(SERVER$headers_in))
 
-
   # check if endpoint is allowed/exported
   endpoint <- get_endpoint(SERVER)
   validate_endpoint(endpoint, packages)
@@ -31,22 +30,52 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
     validate_jwt(SERVER$headers_in, secret)
   }
 
-  # parse request
+  # parse request/get params
   req_data <- parse_req(SERVER, GET)
-  rapache('setHeader', header = "X-Powered-By" ,value = "rApache")
 
   # get function to call (same as pkg::name)
-  what <- getExportedValue(endpoint$pkg, endpoint$fun)
+  fun <- getExportedValue(endpoint$pkg, endpoint$fun)
+
+  # get function params
+  params <- get_params(req_data, fun, secret)
 
   # call function in forked process with specified limits
   result <- sys::eval_safe(
-    do.call(what, params),
+    do.call(fun, params),
     timeout = timeout,
     rlimits = rlimits
   )
 
 }
 
+
+#' Puts parameters for endpoint function into a list.
+#'
+#' If endpoint function includes argument \code{secret} then
+#' it is added to returned list.
+#'
+#' @param req_data Result of call to \code{get_req}.
+#' @param fun The endpoint function which is used to check for
+#'    the \code{secret} argument.
+#' @inheritParams handle
+#'
+#' @return Named list of parameters suplied in request.
+#' @export
+#'
+#' @examples
+get_params <- function(req_data, fun, secret) {
+
+  params <- switch(req_data$method,
+                   'POST' = req_data$post,
+                   'GET'  = req_data$get)
+
+  # add secret if in function argument
+  if ('secret' %in% formalArgs(fun))
+    params$secret <- secret
+
+  return(params)
+
+}
 
 
 #' Validates JSON web token

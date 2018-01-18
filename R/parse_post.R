@@ -1,6 +1,6 @@
 parse_post <- function(req_body, ctype) {
   # check for no data
-  if (!length(reqbody)) {
+  if (!length(req_body)) {
     return(list())
   }
 
@@ -14,21 +14,21 @@ parse_post <- function(req_body, ctype) {
 
   # test for multipart
   if (grepl("multipart/form-data", ctype, fixed=TRUE)) {
-    return(multipart(reqbody, ctype))
+    return(multipart(req_body, ctype))
     # test for url-encoded
 
   } else if (grepl("x-www-form-urlencoded", ctype, fixed=TRUE)) {
-    if (is.raw(reqbody)) {
-      return(webutils::parse_query(reqbody))
+    if (is.raw(req_body)) {
+      return(webutils::parse_query(req_body))
     } else {
-      return(as.list(reqbody))
+      return(as.list(req_body))
     }
 
   } else if (grepl("^application/json", ctype)) {
-    if (is.raw(reqbody)) {
-      jsondata <- rawToChar(reqbody)
+    if (is.raw(req_body)) {
+      jsondata <- rawToChar(req_body)
     } else {
-      jsondata <- reqbody
+      jsondata <- req_body
     }
     if (!(is_valid <- validate(jsondata))) {
       stop("Invalid JSON was posted: ", attr(is_valid, "err"))

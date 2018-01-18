@@ -17,7 +17,7 @@ parse_req <- function(SERVER, GET) {
     req_data$files <- body[file_index]
     req_data$post  <- body[!file_index]
   }
-  print(req_data$post)
+  print(req_data)
 
   return(req_data)
 }
