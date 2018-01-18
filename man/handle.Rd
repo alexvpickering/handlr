@@ -4,17 +4,19 @@
 \alias{handle}
 \title{Handles incomming rApache requests}
 \usage{
-handle(SERVER, packages, open = "all", secret = NULL, timeout = 0,
+handle(SERVER, GET, packages, open = "all", secret = NULL, timeout = 0,
   rlimits = NULL)
 }
 \arguments{
 \item{SERVER}{rApache variable.}
 
+\item{GET}{rApache variable.}
+
 \item{packages}{Vector of packages that api allows.}
 
 \item{open}{Endpoints that are open to non-authenticated users.
-Specify as list of length 2 character vectors
-for example: list(c('package_name', 'package_function'))}
+Specify as named list of vectors.
+for example: list(package_name = 'package_function')}
 
 \item{timeout}{Time limit in seconds for function to execute.}
 

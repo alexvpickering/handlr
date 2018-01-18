@@ -2,10 +2,11 @@
 #' Handles incomming rApache requests
 #'
 #' @param SERVER rApache variable.
+#' @param GET rApache variable.
 #' @param packages Vector of packages that api allows.
 #' @param open Endpoints that are open to non-authenticated users.
-#'    Specify as list of length 2 character vectors
-#'    for example: list(c('package_name', 'package_function'))
+#'    Specify as named list of vectors.
+#'    for example: list(package_name = 'package_function')
 #' @param key string or raw vector needed to decode JSON web token.
 #' @param timeout Time limit in seconds for function to execute.
 #' @param rlimits named vector/list with rlimit values,
@@ -15,52 +16,40 @@
 #' @export
 #'
 #' @examples
-handle <- function(SERVER,
-                   packages,
-                   open = 'all',
-                   secret = NULL,
-                   timeout = 0,
-                   rlimits = NULL) {
+handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
+                   timeout = 0, rlimits = NULL) {
 
-  # lowercase headers
-  req_headers <- SERVER$headers_in
-  names(req_headers) <- tolower(names(req_headers))
+  names(SERVER$headers_in) <- tolower(names(SERVER$headers_in))
 
-  endpoint <- get_endpoint(SERVER)
 
   # check if endpoint is allowed/exported
-  if(!endpoint_valid(endpoint, packages)) return()
+  endpoint <- get_endpoint(SERVER)
+  validate_endpoint(endpoint, packages)
 
   # get claim if endpoint requires JSON web token
   claim <- if(!endpoint_open(endpoint, open)) {
-    validate_jwt(req_headers, secret)
+    validate_jwt(SERVER$headers_in, secret)
   }
 
+  # parse request
+  req_data <- parse_req(SERVER, GET)
+  rapache('setHeader', header = "X-Powered-By" ,value = "rApache")
 
-    # POST body to raw
-    post <- if (SERVER$method == 'POST') {
-      list(
-        body  = rapache('receiveBin'),
-        ctype = req_headers[['content-type']]
-      )
-    }
+  print(req_data)
 
+  # get function to call (same as pkg::name)
+  what <- getExportedValue(endpoint$pkg, endpoint$fun)
 
-  #
-  # # get function to call (same as pkg::name)
-  # what <- getExportedValue(endpoint[1], endpoint[2])
-  #
-  # # call function in forked process with specified limits
-  # result <- sys::eval_safe(
-  #   do.call(what, params),
-  #   timeout = timeout,
-  #   rlimits = rlimits
-  # )
-  #
-  # # return JSON object
-  # set_status(200L)
-  # cat(as.vector(jsonlite::toJSON(result)))
+  # call function in forked process with specified limits
+  result <- sys::eval_safe(
+    do.call(what, params),
+    timeout = timeout,
+    rlimits = rlimits
+  )
+
 }
+
+
 
 #' Validates JSON web token
 #'
@@ -75,8 +64,10 @@ handle <- function(SERVER,
 #' @examples
 validate_jwt <- function(req_headers, secret) {
 
-  if (is.null(secret))
+  if (is.null(secret)) {
+    rapache('setStatus', status = 500L)
     stop("argument 'secret' must be a string or raw vector")
+  }
 
   jwt <- req_headers[['authorization']]
   jwt <- gsub('^Bearer ', '', jwt)
@@ -87,13 +78,14 @@ validate_jwt <- function(req_headers, secret) {
 
 endpoint_open <- function(endpoint, open='all') {
   if (open == 'all') return(TRUE)
-  any(sapply(open, function(x) identical(x, endpoint)))
+
+  return(endpoint$fun %in% open[[endpoint$pkg]])
 }
 
 
 #' Helper function to permit testing.
 #'
-#' Calls rApache function only if rapache environment
+#' Calls rApache function if it can
 #'
 #' @param rapache_function
 #' @param arguments
@@ -102,9 +94,8 @@ endpoint_open <- function(endpoint, open='all') {
 #' @export
 #'
 #' @examples
-rapache <- function(rapache_function, arguments=list()) {
-  if (is.environment('rapache'))
-    do.call(rapache_function, arguments)
+rapache <- function(rapache_function, ...) {
+  try(get(rapache_function)(...), silent=TRUE)
 }
 
 
@@ -117,27 +108,21 @@ rapache <- function(rapache_function, arguments=list()) {
 #' @return
 #'
 #' @examples
-endpoint_valid <- function(endpoint, packages) {
-
+validate_endpoint <- function(endpoint, packages) {
 
   # check if package is allowed
-  if (!endpoint[1] %in% packages) {
-
-    cat('Package', endpoint[1], 'is not an allowed package\n')
-    rapache('setStatus', list(status=403L))
-    return(FALSE)
+  if (!endpoint$pkg %in% packages) {
+    rapache('setStatus', status = 403L)
+    stop('Package ', endpoint$pkg, ' is not an allowed package\n')
   }
 
   # check if package exports function
-  package_functions <- getNamespaceExports(endpoint[1])
-  if (!endpoint[2] %in% package_functions) {
-
-    cat('Function', endpoint[2], 'is not exported by package', endpoint[1], '\n')
-    rapache('setStatus', list(status=404L))
-    return(FALSE)
+  package_functions <- getNamespaceExports(endpoint$pkg)
+  if (!endpoint$fun %in% package_functions) {
+    rapache('setStatus', status = 404L)
+    stop('Function ', endpoint$fun, ' is not exported by package ', endpoint$pkg, '.')
   }
 
-  return(TRUE)
 }
 
 
@@ -146,13 +131,14 @@ endpoint_valid <- function(endpoint, packages) {
 #'
 #' @param SERVER rApache variable: list
 #'
-#' @return character vector of length 2 with first string being the package name and the second the function name
+#' @return Named list with 'pkg' for the package name and 'fun' the function name.
 #' @keywords internal
 #'
 #' @examples
 get_endpoint <- function(SERVER) {
 
-  endpoint <- strsplit(SERVER$path_info, '/')[[1]][2:3]
+  endpoint <- strsplit(SERVER$path_info, '/')[[1]]
+  endpoint <- list(pkg = endpoint[2], fun = endpoint[3])
   return(endpoint)
 }
 

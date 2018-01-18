@@ -10,7 +10,7 @@ get_endpoint(SERVER)
 \item{SERVER}{rApache variable: list}
 }
 \value{
-character vector of length 2 with first string being the package name and the second the function name
+Named list with 'pkg' for the package name and 'fun' the function name.
 }
 \description{
 Gets the package and function names from a path

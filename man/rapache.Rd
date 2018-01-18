@@ -4,7 +4,7 @@
 \alias{rapache}
 \title{Helper function to permit testing.}
 \usage{
-rapache(rapache_function, arguments = list())
+rapache(rapache_function, ...)
 }
 \arguments{
 \item{arguments}{}
