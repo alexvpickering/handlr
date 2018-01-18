@@ -8,6 +8,9 @@ validate_jwt(req_headers, secret)
 }
 \arguments{
 \item{req_headers}{List with request headers.}
+
+\item{secret}{string or raw vector needed to encode/decode JSON web token.
+Gets passed along to endpoints with argument 'secret'.}
 }
 \value{
 List with claim.

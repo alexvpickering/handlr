@@ -18,12 +18,13 @@ handle(SERVER, GET, packages, open = "all", secret = NULL, timeout = 0,
 Specify as named list of vectors.
 for example: list(package_name = 'package_function')}
 
+\item{secret}{string or raw vector needed to encode/decode JSON web token.
+Gets passed along to endpoints with argument 'secret'.}
+
 \item{timeout}{Time limit in seconds for function to execute.}
 
 \item{rlimits}{named vector/list with rlimit values,
 for example: c(cpu = 60, fsize = 1e6).}
-
-\item{key}{string or raw vector needed to decode JSON web token.}
 }
 \description{
 Handles incomming rApache requests

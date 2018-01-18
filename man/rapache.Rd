@@ -7,8 +7,10 @@
 rapache(rapache_function, ...)
 }
 \arguments{
-\item{arguments}{}
+\item{rapache_function}{Name of rApache function to evaluate.}
+
+\item{...}{Additional arguments to rApache function.}
 }
 \description{
-Calls rApache function only if rapache environment
+Calls rApache function if it can
 }

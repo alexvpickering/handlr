@@ -30,6 +30,9 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
     validate_jwt(SERVER$headers_in, secret)
   }
 
+  # get raw body
+  SERVER$raw <- rapache('receiveBin')
+
   # parse request/get params
   req_data <- parse_req(SERVER, GET)
 
@@ -46,6 +49,7 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
     rlimits = rlimits
   )
 
+  cat(result)
 }
 
 
