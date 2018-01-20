@@ -5,7 +5,10 @@ setHeader(header = "X-Powered-By", value = "rApache")
 readRenviron('path/to/.Renviron')
 
 packages <- 'authr'
-open <- list(authr = c('add_user', 'login_user'))
+open <- list(authr = c('add_user',
+                       'login_user',
+                       'forgot_password',
+                       'reset_password'))
 
 tryCatch(
   handlr::handle(SERVER, GET, packages, open),
