@@ -23,37 +23,15 @@
 
 Assumes Ubuntu 16.04. See the [wiki](https://github.com/alexvpickering/handlr/wiki) for a more thorough intro and `authr` integration.
 
-Install Apache2, rApache, and add an example site:
+Install Apache2, rApache, and create an `entry.R` file that rApache will run:
 
 ```
 sudo apt update
-sudo apt install apache2
+sudo apt install apache2 -y
 
-sudo add-apt-repository ppa:opencpu/rapache
+sudo add-apt-repository ppa:opencpu/rapache -y
 sudo apt-get update
-sudo apt-get install libapache2-mod-r-base
-
-sudo touch /etc/apache2/sites-available/example.conf
-sudo vi /etc/apache2/sites-available/example.conf
-```
-
-Type `i` to insert then paste the following:
-
-```apache
-LoadModule R_module /usr/lib/apache2/modules/mod_R.so
-
-<Location /api>
-	SetHandler r-handler
-	RFileHandler /var/www/R/entry.R
-</Location>
-```
-
-Save (type `:wq` then hit enter). To enable the above site and create the `entry.R` that rApache will run:
-
-
-```
-sudo a2ensite example
-sudo service apache2 reload
+sudo apt-get install libapache2-mod-r-base -y
 
 sudo mkdir /var/www/R
 sudo touch /var/www/R/entry.R
@@ -70,6 +48,30 @@ packages <- c('your_package')
 
 handlr::handle(SERVER, GET, packages)
 DONE
+```
+Save (type `esc:wq` then hit enter). Now create an example Apache2 site that will run `entry.R` for incomming http requests:
+
+```
+sudo touch /etc/apache2/sites-available/example.conf
+sudo vi /etc/apache2/sites-available/example.conf
+```
+
+Type `i` to insert then paste the following:
+
+```apache
+LoadModule R_module /usr/lib/apache2/modules/mod_R.so
+
+<Location /api>
+	SetHandler r-handler
+	RFileHandler /var/www/R/entry.R
+</Location>
+```
+
+Enable the example site:
+
+```
+sudo a2ensite example
+sudo service apache2 reload
 ```
 
 Save and exit as before. Install `handlr` and `your_package`, making sure they will be available to the `www-data` user that Apache2 runs under:
