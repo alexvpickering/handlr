@@ -1,18 +1,18 @@
 Package: handlr
 Type: Package
-Title: What the Package Does (Title Case)
+Title: handler for rApache http requests
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Alex Pickering
+Maintainer: Alex Pickering <alexvpickering@gmail.com>
+Description: handlr makes R functions available as API endpoints.
+    It is the less opinionated cousin of OpenCPU.
 Imports:
   sys,
   jose,
   webutils,
   jsonlite
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Suggests: testthat
+Suggests: testthat, authr
 RoxygenNote: 6.0.1
