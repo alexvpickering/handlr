@@ -56,7 +56,7 @@ sudo touch /etc/apache2/sites-available/example.conf
 sudo vi /etc/apache2/sites-available/example.conf
 ```
 
-Type `i` to insert then paste the following:
+Type `i` to insert, then paste the following:
 
 ```apache
 LoadModule R_module /usr/lib/apache2/modules/mod_R.so
@@ -77,11 +77,9 @@ sudo service apache2 reload
 Save and exit as before. Install `handlr` and `your_package`, making sure they will be available to the `www-data` user that Apache2 runs under:
 
 ```R
-# system dependencies
+# devtools dependencies
 sudo apt install libssl-dev 
 sudo apt install libcurl4-openssl-dev
-sudo apt install libsodium-dev
-sudo apt install libsasl2-dev
 
 sudo R
 .libPaths('/usr/local/lib/R/site-library')

@@ -6,8 +6,6 @@
 #' @param open Endpoints that are open to non-authenticated users.
 #'    Specify as named list of vectors.
 #'    for example: list(package_name = 'package_function')
-#' @param secret string or raw vector needed to encode/decode JSON web token.
-#'    Gets passed along to endpoints with argument 'secret'.
 #' @param timeout Time limit in seconds for function to execute.
 #' @param rlimits named vector/list with rlimit values,
 #'    for example: c(cpu = 60, fsize = 1e6).
@@ -16,8 +14,7 @@
 #' @export
 #'
 #' @examples
-handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
-                   timeout = 0, rlimits = NULL) {
+handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = NULL) {
 
   names(SERVER$headers_in) <- tolower(names(SERVER$headers_in))
 
@@ -27,7 +24,7 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
 
   # get claim if endpoint requires JSON web token
   claim <- if(!endpoint_open(endpoint, open)) {
-    validate_jwt(SERVER$headers_in, secret)
+    validate_jwt(SERVER$headers_in)
   }
 
   # get raw body
@@ -35,12 +32,10 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
 
   # parse request/get params
   req_data <- parse_req(SERVER, GET)
+  params <- get_params(req_data)
 
   # get function to call (same as pkg::name)
   fun <- getExportedValue(endpoint$pkg, endpoint$fun)
-
-  # get function params
-  params <- get_params(req_data, fun, secret)
 
   # call function in forked process with specified limits
   result <- sys::eval_safe(
@@ -55,28 +50,19 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
 
 #' Puts parameters for endpoint function into a list.
 #'
-#' If endpoint function includes argument \code{secret} then
-#' it is added to returned list.
 #'
 #' @param req_data Result of call to \code{get_req}.
-#' @param fun The endpoint function which is used to check for
-#'    the \code{secret} argument.
-#' @inheritParams handle
 #'
 #' @return Named list of parameters suplied in request.
-#' @export
 #'
 #' @examples
-get_params <- function(req_data, fun, secret) {
+get_params <- function(req_data) {
 
   params <- switch(req_data$method,
                    'POST' = req_data$post,
                    'GET'  = req_data$get)
 
-  # add secret if in function argument
-  if ('secret' %in% formalArgs(fun))
-    params$secret <- secret
-
+  if (is.null(params)) params <- list()
   return(params)
 
 }
@@ -87,18 +73,13 @@ get_params <- function(req_data, fun, secret) {
 #' Error occurs if validation fails.
 #'
 #' @param req_headers List with request headers.
-#' @inheritParams handle
 #'
 #' @return List with claim.
-#' @export
 #'
 #' @examples
-validate_jwt <- function(req_headers, secret) {
+validate_jwt <- function(req_headers) {
 
-  if (is.null(secret)) {
-    rapache('setStatus', status = 500L)
-    stop("argument 'secret' must be a string or raw vector")
-  }
+  secret <- get_env('JWT_SECRET')
 
   jwt <- req_headers[['authorization']]
   jwt <- gsub('^Bearer ', '', jwt)
@@ -106,7 +87,29 @@ validate_jwt <- function(req_headers, secret) {
   jose::jwt_decode_hmac(jwt, secret)
 }
 
+#' Get environment variable.
+#'
+#' Throws error is environment variable is not defined.
+#'
+#' @param var_name Environment variable to get.
+#' @return Value of environment variable.
+#'
+#' @examples
+get_env <- function(var_name) {
+  var <- Sys.getenv(var_name)
+  if (var == '') stop(var_name, ' environment variable is not set.')
+  return(var)
+}
 
+
+#' Check if endpoint is open
+#'
+#' @inheritParams validate_endpoint
+#' @inheritParams handle
+#'
+#' @return
+#'
+#' @examples
 endpoint_open <- function(endpoint, open='all') {
   if (open == 'all') return(TRUE)
 
@@ -122,7 +125,6 @@ endpoint_open <- function(endpoint, open='all') {
 #' @param ... Additional arguments to rApache function.
 #'
 #' @return
-#' @export
 #'
 #' @examples
 rapache <- function(rapache_function, ...) {
@@ -133,7 +135,7 @@ rapache <- function(rapache_function, ...) {
 
 #' Check if endpoint is allowed/exists
 #'
-#' @param endpoint Character vector length two: package and function name
+#' @param endpoint Named list with \code{pkg} and \code{fun} strings.
 #' @param allowed_packages Character vector of allowed package endpoints
 #'
 #' @return
