@@ -18,6 +18,9 @@ handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = N
 
   names(SERVER$headers_in) <- tolower(names(SERVER$headers_in))
 
+  # CORS
+  rapache('setHeader', header = "Access-Control-Allow-Origin", value = "*")
+
   # check if endpoint is allowed/exported
   endpoint <- get_endpoint(SERVER)
   validate_endpoint(endpoint, packages)
