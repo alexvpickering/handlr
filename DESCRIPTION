@@ -10,7 +10,6 @@ Imports:
   sys,
   jose,
   webutils,
-  curl,
   jsonlite
 License: What license is it under?
 Encoding: UTF-8

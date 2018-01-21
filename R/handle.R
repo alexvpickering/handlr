@@ -49,7 +49,7 @@ handle <- function(SERVER, GET, packages, open = 'all', secret = NULL,
     rlimits = rlimits
   )
 
-  cat(result)
+  cat(jsonlite::toJSON(result))
 }
 
 
