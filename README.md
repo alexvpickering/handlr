@@ -21,7 +21,7 @@
 
 # Getting Started
 
-Assumes Ubuntu 16.04. See the [wiki](https://github.com/alexvpickering/handlr/wiki) for a more thorough intro and `authr` integration.
+Assumes Ubuntu 16.04. See the [wiki](https://github.com/alexvpickering/handlr/wiki) for a more thorough intro and [`authr`](https://github.com/alexvpickering/authr) for user management.
 
 Install Apache2, rApache, and create an `entry.R` file that rApache will run:
 
