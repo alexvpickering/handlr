@@ -4,8 +4,7 @@
 \alias{handle}
 \title{Handles incomming rApache requests}
 \usage{
-handle(SERVER, GET, packages, open = "all", secret = NULL, timeout = 0,
-  rlimits = NULL)
+handle(SERVER, GET, packages, open = "all", timeout = 0, rlimits = NULL)
 }
 \arguments{
 \item{SERVER}{rApache variable.}
@@ -17,9 +16,6 @@ handle(SERVER, GET, packages, open = "all", secret = NULL, timeout = 0,
 \item{open}{Endpoints that are open to non-authenticated users.
 Specify as named list of vectors.
 for example: list(package_name = 'package_function')}
-
-\item{secret}{string or raw vector needed to encode/decode JSON web token.
-Gets passed along to endpoints with argument 'secret'.}
 
 \item{timeout}{Time limit in seconds for function to execute.}
 

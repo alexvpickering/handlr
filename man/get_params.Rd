@@ -4,21 +4,14 @@
 \alias{get_params}
 \title{Puts parameters for endpoint function into a list.}
 \usage{
-get_params(req_data, fun, secret)
+get_params(req_data)
 }
 \arguments{
 \item{req_data}{Result of call to \code{get_req}.}
-
-\item{fun}{The endpoint function which is used to check for
-the \code{secret} argument.}
-
-\item{secret}{string or raw vector needed to encode/decode JSON web token.
-Gets passed along to endpoints with argument 'secret'.}
 }
 \value{
 Named list of parameters suplied in request.
 }
 \description{
-If endpoint function includes argument \code{secret} then
-it is added to returned list.
+Puts parameters for endpoint function into a list.
 }

@@ -11,6 +11,9 @@ rapache(rapache_function, ...)
 
 \item{...}{Additional arguments to rApache function.}
 }
+\value{
+
+}
 \description{
 Calls rApache function if it can
 }

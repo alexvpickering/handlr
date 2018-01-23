@@ -16,10 +16,11 @@
 #' @examples
 handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = NULL) {
 
+  # preflight/cors
+  if (preflight(SERVER)) return()
+
   names(SERVER$headers_in) <- tolower(names(SERVER$headers_in))
 
-  # CORS
-  rapache('setHeader', header = "Access-Control-Allow-Origin", value = "*")
 
   # check if endpoint is allowed/exported
   endpoint <- get_endpoint(SERVER)
@@ -37,6 +38,7 @@ handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = N
   req_data <- parse_req(SERVER, GET)
   params <- get_params(req_data)
 
+
   # get function to call (same as pkg::name)
   fun <- getExportedValue(endpoint$pkg, endpoint$fun)
 
@@ -50,6 +52,27 @@ handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = N
   cat(jsonlite::toJSON(result))
 }
 
+#' Sets CORS headers and checks if preflight
+#'
+#' @param SERVER rApache variable
+#'
+#' @return TRUE if method is OPTIONS otherwise FALSE.
+#'
+#' @examples
+preflight <- function(SERVER) {
+
+  # preflight/CORS
+  rapache('setHeader', header = "X-Powered-By", value = "rApache")
+  rapache('setHeader', header = "Access-Control-Allow-Origin", value = "*")
+  rapache('setHeader', header = "Access-Control-Allow-Headers", value = "Origin, Content-Type, Accept, Accept-Encoding, Cache-Control, Authorization")
+
+  if(SERVER$method == "OPTIONS"){
+    setHeader("Access-Control-Allow-Methods", c("POST, GET, HEAD, OPTIONS, DELETE"))
+    rapache('setStatus', 200L)
+    return(TRUE)
+  }
+  return(FALSE)
+}
 
 #' Puts parameters for endpoint function into a list.
 #'

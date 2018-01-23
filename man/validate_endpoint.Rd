@@ -7,7 +7,7 @@
 validate_endpoint(endpoint, packages)
 }
 \arguments{
-\item{endpoint}{Character vector length two: package and function name}
+\item{endpoint}{Named list with \code{pkg} and \code{fun} strings.}
 
 \item{allowed_packages}{Character vector of allowed package endpoints}
 }
