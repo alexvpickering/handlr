@@ -15,7 +15,6 @@
 #'
 #' @examples
 handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = NULL) {
-
   # preflight/cors
   if (preflight(SERVER)) return()
 
@@ -49,7 +48,7 @@ handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = N
     rlimits = rlimits
   )
 
-  cat(jsonlite::toJSON(result))
+  rapache('sendBin', charToRaw(jsonlite::toJSON(result)))
 }
 
 #' Sets CORS headers and checks if preflight
@@ -62,13 +61,11 @@ handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = N
 preflight <- function(SERVER) {
 
   # preflight/CORS
-  rapache('setHeader', header = "X-Powered-By", value = "rApache")
-  rapache('setHeader', header = "Access-Control-Allow-Origin", value = "*")
-  rapache('setHeader', header = "Access-Control-Allow-Headers", value = "Origin, Content-Type, Accept, Accept-Encoding, Cache-Control, Authorization")
+  rapache('setHeader', header = 'Access-Control-Allow-Origin', value = '*')
+  rapache('setHeader', header = 'Access-Control-Allow-Headers', value = 'Origin, Content-Type, Accept-Encoding, Authorization')
 
   if(SERVER$method == "OPTIONS"){
-    setHeader("Access-Control-Allow-Methods", c("POST, GET, HEAD, OPTIONS, DELETE"))
-    rapache('setStatus', 200L)
+    rapache('setHeader', header = 'Access-Control-Allow-Methods', value = 'POST, GET, HEAD, OPTIONS, DELETE')
     return(TRUE)
   }
   return(FALSE)
@@ -170,17 +167,15 @@ rapache <- function(rapache_function, ...) {
 validate_endpoint <- function(endpoint, packages) {
 
   # check if package is allowed
-  if (!endpoint$pkg %in% packages) {
-    rapache('setStatus', status = 403L)
-    stop('Package ', endpoint$pkg, ' is not an allowed package\n')
-  }
+  if (!endpoint$pkg %in% packages)
+    stop('403 Package ', endpoint$pkg, ' is not an allowed package\n')
+
 
   # check if package exports function
   package_functions <- getNamespaceExports(endpoint$pkg)
-  if (!endpoint$fun %in% package_functions) {
-    rapache('setStatus', status = 404L)
-    stop('Function ', endpoint$fun, ' is not exported by package ', endpoint$pkg, '.')
-  }
+  if (!endpoint$fun %in% package_functions)
+    stop('404 Function ', endpoint$fun, ' is not exported by package ', endpoint$pkg, '.')
+
 
 }
 

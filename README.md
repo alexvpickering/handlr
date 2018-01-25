@@ -47,7 +47,6 @@ setHeader(header = "X-Powered-By", value = "rApache")
 packages <- c('your_package')
 
 handlr::handle(SERVER, GET, packages)
-DONE
 ```
 Save (type `esc:wq` then hit enter). Now create an example Apache2 site that will run `entry.R` for incomming http requests:
 
