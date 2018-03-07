@@ -10,17 +10,26 @@ try(con$drop(), silent = TRUE)
 email <- 'blah@gmail.com'
 password <- '12345'
 
+responseToR <- function(response) {
+
+  # convert back to JSON string
+  json <- rawToChar(response$content)
+
+  # convert to R string
+  jsonlite::fromJSON(json)
+}
 
 
-test_that("handle returns JWT from evaluation of authr::add_user", {
 
-    response <- httr::POST(url = 'http://localhost:8005/api/authr/add_user',
+test_that("handle returns JWT from evaluation of authr::register_user", {
+
+    response <- httr::POST(url = 'http://localhost:8005/api/authr/register_user',
                encode = 'form',
                body = list(email = email, password = password))
 
     expect_equal(response$status_code, 200L)
 
-    jwt <- jose::jwt_decode_hmac(rawToChar(response$content), Sys.getenv('JWT_SECRET'))
+    jwt <- jose::jwt_decode_hmac(responseToR(response), Sys.getenv('JWT_SECRET'))
     expect_equal(jwt$email, email)
 
 })
@@ -33,7 +42,7 @@ test_that('handle returns JWT from evaluation of authr::login_user', {
 
   expect_equal(response$status_code, 200L)
 
-  jwt <- jose::jwt_decode_hmac(rawToChar(response$content), Sys.getenv('JWT_SECRET'))
+  jwt <- jose::jwt_decode_hmac(responseToR(response), Sys.getenv('JWT_SECRET'))
   expect_equal(jwt$email, email)
 
 })

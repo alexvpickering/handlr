@@ -47,7 +47,6 @@ handle <- function(SERVER, GET, packages, open = 'all', timeout = 0, rlimits = N
     timeout = timeout,
     rlimits = rlimits
   )
-
   rapache('sendBin', charToRaw(jsonlite::toJSON(result)))
 }
 
@@ -101,12 +100,13 @@ get_params <- function(req_data) {
 #'
 #' @examples
 validate_jwt <- function(req_headers) {
-
   secret <- get_env('JWT_SECRET')
 
   jwt <- req_headers[['authorization']]
-  jwt <- gsub('^Bearer ', '', jwt)
+  if (!length(jwt))
+    stop('401 Requested endpoint requires authentication.')
 
+  jwt <- gsub('^Bearer ', '', jwt)
   jose::jwt_decode_hmac(jwt, secret)
 }
 
@@ -169,7 +169,6 @@ validate_endpoint <- function(endpoint, packages) {
   # check if package is allowed
   if (!endpoint$pkg %in% packages)
     stop('403 Package ', endpoint$pkg, ' is not an allowed package\n')
-
 
   # check if package exports function
   package_functions <- getNamespaceExports(endpoint$pkg)
